@@ -103,7 +103,7 @@ public class DishController {
     @GetMapping("/list")
     public R<List<DishDto>> getDishByCategoryId(Dish dish){
         List<DishDto> dishDtoList = null;
-        String key = "dish_" +  dish.getCategoryId() + "_" + dish.getStatus(); //redis中以类别id作为key缓存菜品列表
+        String key = "dish_" +  dish.getCategoryId() + "_1"; //redis中以类别id作为key缓存菜品列表
 
         //先从Redis中获取缓存数据
         dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
@@ -114,7 +114,7 @@ public class DishController {
         //如果不存在，需要查询数据库，将查询到的菜品数据缓存到Redis
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Dish::getCategoryId, dish.getCategoryId());
-        queryWrapper.eq(Dish::getStatus, dish.getStatus());
+        queryWrapper.eq(dish.getStatus()!=null, Dish::getStatus, dish.getStatus());
         List<Dish> dishList = dishService.list(queryWrapper);
 
         dishDtoList = dishList.stream().map((item)->{
